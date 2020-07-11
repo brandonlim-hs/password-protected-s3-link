@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
+  OriginAccessIdentityComment:
+    Type: String
+    Default: CloudFront user to access S3
+    Description: Any comments about the origin access identity.
+
   OriginId:
     Type: String
     Default: originId
@@ -36,6 +41,26 @@ Resources:
             Id: !Ref OriginId
             OriginPath: !Ref OriginPath
             S3OriginConfig:
-              OriginAccessIdentity: ''
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${CloudFrontOAI}'
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
+
+  CloudFrontOAI:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref OriginAccessIdentityComment
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketName
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOAI}'
+            Resource: !Sub 'arn:aws:s3:::${S3BucketName}/*'
+            Sid: AccessFromCloudFrontOnly
