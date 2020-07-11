@@ -33,6 +33,9 @@ Resources:
             Cookies:
               Forward: none
             QueryString: false
+          LambdaFunctionAssociations:
+            - EventType: viewer-request
+              LambdaFunctionARN: !Ref LambdaCloudFrontAuthCheckVersion
           TargetOriginId: !Ref OriginId
           ViewerProtocolPolicy: redirect-to-https
         Enabled: true
@@ -50,6 +53,36 @@ Resources:
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Ref OriginAccessIdentityComment
+
+  LambdaCloudFrontAuthCheck:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: src/index.js
+      Description: Function to check authentication from CloudFront viewer-request trigger
+      FunctionName: CloudFrontAuthCheck
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: nodejs12.x
+
+  LambdaCloudFrontAuthCheckVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref LambdaCloudFrontAuthCheck
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - edgelambda.amazonaws.com
+                - lambda.amazonaws.com
+        Version: 2012-10-17
+      RoleName: lambda-cloudfront-auth-check
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
