@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "OriginPath",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "S3BucketName",
+    "ParameterValue": "example"
+  }
+]

@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  OriginId:
+    Type: String
+    Default: originId
+    Description: A unique identifier for the origin.
+
+  OriginPath:
+    Type: String
+    Default: ''
+    Description: An optional path that appends to the origin domain name, beginning with a /.
+
+  S3BucketName:
+    Type: String
+    Description: The name of the Amazon S3 bucket.
+
+Resources:
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            Cookies:
+              Forward: none
+            QueryString: false
+          TargetOriginId: !Ref OriginId
+          ViewerProtocolPolicy: redirect-to-https
+        Enabled: true
+        Origins:
+          - DomainName: !Sub '${S3BucketName}.s3.amazonaws.com'
+            Id: !Ref OriginId
+            OriginPath: !Ref OriginPath
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
