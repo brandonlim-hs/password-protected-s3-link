@@ -82,6 +82,8 @@ Resources:
                 - edgelambda.amazonaws.com
                 - lambda.amazonaws.com
         Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       RoleName: lambda-cloudfront-auth-check
 
   S3BucketPolicy:
